@@ -1,0 +1,2 @@
+jira==3.4.1
+notion-database==20220628.2

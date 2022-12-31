@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+import argparse
+
+from jira_2_notion_db.services.jira_service import JiraService
+from jira_2_notion_db.services.notion_service import NotionService
+
+parser = argparse.ArgumentParser(description='Export Jira Issues and Import Notion Database')
+parser.add_argument('--url', required=True, help='Jira url ex) https://your.atlassian.net')
+parser.add_argument('--username', required=True, help='Jira username')
+parser.add_argument('--password', required=True, help='Jira api token')
+parser.add_argument('--project', required=True, help='Jira project name')
+parser.add_argument('--notion', required=True, help='Notion bot token')
+parser.add_argument('--delay', help='Notion update delay')
+
+args = parser.parse_args()
+if not args.delay:
+    args.delay = 1
+
+jira = JiraService(base_url=args.url, username=args.username, password=args.password)
+notion = NotionService(notion_key=args.notion)
+
+jira.login()
+jira_contents = jira.collect(project=args.project, only_my_issue=False)
+notion.run(db_name=args.project, data=jira_contents, delay_time=args.delay)
