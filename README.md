@@ -14,6 +14,12 @@ pip install jira-2-notion-db
 
 ## Usage
 
+should be able to find Notion db using Jira project name.
+
+```shell
+jira-2-notion-db --url "https://your.atlassian.net" --username "your@mail.com" --password "yourAtlassianToken" --project "PJ" --notion "yourNotionIntegrationToken"
+```
+
 * arguments:
   * --url URL
     * Jira url ex) https://your.atlassian.net
