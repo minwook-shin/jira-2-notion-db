@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="jira-2-notion-db",
-    version="1.0",
+    version="1.1",
     author="minwook-shin",
     author_email="minwook0106@gmail.com",
     description="Jira to Notion-database Migration Tool",
@@ -17,7 +17,7 @@ setuptools.setup(
     },
     install_requires=[
         "jira==3.4.1",
-        "notion-database==20220628.2"
+        "notion-database==20220628.3"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

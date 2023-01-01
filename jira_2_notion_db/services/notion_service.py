@@ -31,13 +31,12 @@ class NotionService:
         notion_property = Properties()
         notion_property.set_title("title")
         notion_property.set_rich_text("key")
-        notion_property.set_rich_text("issue_type")
-        notion_property.set_rich_text("project_name")
-        notion_property.set_rich_text("create_date")
-        notion_property.set_rich_text("update_date")
-        notion_property.set_rich_text("priority")
+        notion_property.set_select("issue_type")
+        notion_property.set_select("project_name")
+        notion_property.set_select("priority")
         notion_property.set_select("reporter")
-        notion_property.set_rich_text("status")
+        notion_property.set_select("status")
+        notion_property.set_date("date")
         return notion_property
 
     def __create_page(self, database_id, data, delay_time):
@@ -45,13 +44,12 @@ class NotionService:
             notion_property = Properties()
             notion_property.set_title("title", item["summary"])
             notion_property.set_rich_text("key", item["key"])
-            notion_property.set_rich_text("issue_type", item["issue_type"])
-            notion_property.set_rich_text("project_name", item["project_name"])
-            notion_property.set_rich_text("create_date", item["create_date"])
-            notion_property.set_rich_text("update_date", item["update_date"])
-            notion_property.set_rich_text("priority", item["priority"])
+            notion_property.set_select("issue_type", item["issue_type"])
+            notion_property.set_select("project_name", item["project_name"])
+            notion_property.set_select("priority", item["priority"])
             notion_property.set_select("reporter", item["reporter"])
-            notion_property.set_rich_text("status", item["status"])
+            notion_property.set_select("status", item["status"])
+            notion_property.set_date("date", start=item["create_date"], end=item["resolution_date"])
             # Original URL
             children = Children()
             children.set_heading_1("Original URL")
@@ -93,6 +91,10 @@ class NotionService:
                 children.set_heading_1("Resolution Date")
                 children.set_paragraph(item["resolution_date"])
                 children.set_divider()
+            # create/update date
+            children.set_heading_1("Create/Update Date")
+            children.set_paragraph(f'created : {item["create_date"]}')
+            children.set_paragraph(f'updated : {item["update_date"]}')
 
             page = Page(integrations_token=self.notion_key)
             LOGGER.info(f"{item['id']}:{item['summary']}")

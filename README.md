@@ -1,5 +1,7 @@
 # Jira 2 Notion DB
 
+Jira issue to Notion database Migration Tool
+
 ## Installation
 
 ```shell
