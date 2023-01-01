@@ -1,3 +1,10 @@
+## 1.1.1
+
+* Fix None, length exception bug
+
+* Add manual update for debug
+  * ex) --issue PJ-1
+
 ## 1.1
 
 * Add create ~ resolution database field
