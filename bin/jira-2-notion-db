@@ -11,6 +11,7 @@ parser.add_argument('--password', required=True, help='Jira api token')
 parser.add_argument('--project', required=True, help='Jira project name')
 parser.add_argument('--notion', required=True, help='Notion bot token')
 parser.add_argument('--delay', help='Notion update delay')
+parser.add_argument('--issue', help='if wants each issue update')
 
 args = parser.parse_args()
 if not args.delay:
@@ -20,5 +21,9 @@ jira = JiraService(base_url=args.url, username=args.username, password=args.pass
 notion = NotionService(notion_key=args.notion)
 
 jira.login()
-jira_contents = jira.collect(project=args.project, only_my_issue=False)
-notion.run(db_name=args.project, data=jira_contents, delay_time=args.delay)
+if args.issue:
+    jira_contents = jira.collect(project=args.project, only_my_issue=False, issue_number=args.issue)
+    notion.run(db_name=args.project, data=jira_contents, delay_time=int(args.delay), is_field_update=False)
+else:
+    jira_contents = jira.collect(project=args.project, only_my_issue=False)
+    notion.run(db_name=args.project, data=jira_contents, delay_time=int(args.delay))

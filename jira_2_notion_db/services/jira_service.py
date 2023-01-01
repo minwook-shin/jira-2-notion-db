@@ -62,6 +62,14 @@ class JiraService:
             assignee = "None"
         return assignee
 
+    @classmethod
+    def __set_reporter_data(cls, issue):
+        if issue["fields"].get("reporter", None):
+            reporter = issue["fields"]["reporter"]["displayName"]
+        else:
+            reporter = "Deleted User"
+        return reporter
+
     def __set_issue_url(self, issue):
         return self.base_url + "/browse/" + issue["key"]
 
@@ -80,9 +88,15 @@ class JiraService:
                 all_attachments.append(attachment_data)
         return all_attachments
 
-    def collect(self, project, only_my_issue=True):
+    def collect(self, project, only_my_issue=True, issue_number=None):
         all_issue = []
-        issues, count = self.__search_issue(project=project, only_my_issue=only_my_issue)
+        if issue_number:
+            query = self.api.search_issues(f'project = "{project}" and issuekey = "{issue_number}"', json_result=True)
+            LOGGER.info(f"Detected issue_number : {issue_number}")
+            issues = query["issues"]
+            count = int(query.get('total', 0))
+        else:
+            issues, count = self.__search_issue(project=project, only_my_issue=only_my_issue)
         for issue in issues:
             if count:
                 simple_comments = self.__set_comments_data(issue=issue)
@@ -99,7 +113,7 @@ class JiraService:
                     "update_date": issue["fields"]["updated"],
                     "priority": issue["fields"]["priority"]["name"],
                     "assignee": assignee,
-                    "reporter": issue["fields"]["reporter"]["displayName"],
+                    "reporter": self.__set_reporter_data(issue=issue),
                     "status": issue["fields"]["status"]["name"],
                     "summary": issue["fields"]["summary"],
                     "description": issue["fields"]["description"],

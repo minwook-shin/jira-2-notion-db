@@ -37,6 +37,7 @@ class NotionService:
         notion_property.set_select("reporter")
         notion_property.set_select("status")
         notion_property.set_date("date")
+        notion_property.set_url("url")
         return notion_property
 
     def __create_page(self, database_id, data, delay_time):
@@ -50,61 +51,61 @@ class NotionService:
             notion_property.set_select("reporter", item["reporter"])
             notion_property.set_select("status", item["status"])
             notion_property.set_date("date", start=item["create_date"], end=item["resolution_date"])
+            notion_property.set_url("url", item["url"])
             # Original URL
             children = Children()
-            children.set_heading_1("Original URL")
-            children.set_paragraph(item["url"])
-            children.set_divider()
             # Parent Issue
             if item["parent"]:
                 children.set_heading_1("Parent Issue")
-                children.set_paragraph(item["parent"]["key"])
-                children.set_paragraph(item["parent"]["summary"])
-                children.set_divider()
+                children.set_paragraph(f'{item["parent"]["key"]} - {item["parent"]["summary"]}')
             # Assignee
-            children.set_heading_1("Assignee")
             if item["assignee"]:
+                children.set_heading_1("Assignee")
                 children.set_paragraph(item["assignee"])
-            children.set_divider()
             # Description
             children.set_heading_1("Description")
             if item["description"]:
                 divide_desc = item["description"].split("\n")
-                for line in divide_desc:
-                    children.set_paragraph(line)
-            children.set_divider()
+                if len(divide_desc) >= 90:
+                    LOGGER.warning(f'{item["summary"]} - len(description count) >= 90')
+                    children.set_paragraph('ERROR! This text count is too long, see original ticket for detail.')
+                else:
+                    for line in divide_desc:
+                        if len(line) >= 2000:
+                            LOGGER.warning(f'{item["summary"]} - len(description) >= 2000')
+                            children.set_paragraph('ERROR! This text is too long, see original ticket for detail.')
+                        else:
+                            children.set_paragraph(line)
             # Comment
-            children.set_heading_1("Comment")
             if item["comment"]:
+                children.set_heading_1("Comment")
                 for line in item["comment"]:
-                    children.set_paragraph(f'{line["created"]}')
-                    children.set_paragraph(f'{line["author"]} : {line["body"]}')
-            children.set_divider()
+                    if len(line["body"]) >= 2000:
+                        LOGGER.warning(f'{item["summary"]} - len(comment) >= 2000')
+                        children.set_paragraph(f'{line["author"]} ({line["created"]}) : '
+                                               f'ERROR! This text is too long, see original ticket for detail.')
+                    else:
+                        children.set_paragraph(f'{line["author"]} ({line["created"]}) : {line["body"]}')
             # Attachment
-            children.set_heading_1("Attachment")
             if item["attachment"]:
+                children.set_heading_1("Attachment")
                 for line in item["attachment"]:
                     children.set_paragraph(str(line))
-            children.set_divider()
-            # Resolution
-            if item["resolution_date"]:
-                children.set_heading_1("Resolution Date")
-                children.set_paragraph(item["resolution_date"])
-                children.set_divider()
-            # create/update date
-            children.set_heading_1("Create/Update Date")
-            children.set_paragraph(f'created : {item["create_date"]}')
-            children.set_paragraph(f'updated : {item["update_date"]}')
+            # create/update/resolution date
+            children.set_heading_1("Create/Update/Resolution Date")
+            children.set_paragraph(f'created : {item["create_date"]} | updated : {item["update_date"]}'
+                                   f' | resolution : {str(item["resolution_date"])}')
 
             page = Page(integrations_token=self.notion_key)
             LOGGER.info(f"{item['id']}:{item['summary']}")
             page.create_page(database_id=database_id, properties=notion_property, children=children)
             time.sleep(delay_time)
 
-    def run(self, db_name, data, delay_time=0):
+    def run(self, db_name, data, delay_time=0, is_field_update=True):
         db_result = self.__search_database(db_name=db_name)
         for i in db_result:
             database_id = i["id"]
             db = self.__retrieve_database(database_id=database_id)
-            db.update_database(database_id=database_id, add_properties=self.__set_property())
+            if is_field_update:
+                db.update_database(database_id=database_id, add_properties=self.__set_property())
             self.__create_page(database_id=database_id, data=data, delay_time=delay_time)
