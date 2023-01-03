@@ -51,8 +51,7 @@ class NotionService:
             notion_property.set_select("priority", item["priority"])
             notion_property.set_select("reporter", item["reporter"])
             notion_property.set_select("status", item["status"])
-            if item["assignee"]:
-                notion_property.set_select("assignee", item["assignee"])
+            notion_property.set_select("assignee", item["assignee"])
             notion_property.set_date("date", start=item["create_date"], end=item["resolution_date"])
             notion_property.set_url("url", item["url"])
             # Original URL
