@@ -1,3 +1,8 @@
+## 1.1.2
+
+* add missing assignee field
+  * rollback to previous method
+
 ## 1.1.1
 
 * Fix None, length exception bug

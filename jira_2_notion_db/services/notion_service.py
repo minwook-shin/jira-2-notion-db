@@ -38,6 +38,7 @@ class NotionService:
         notion_property.set_select("status")
         notion_property.set_date("date")
         notion_property.set_url("url")
+        notion_property.set_select("assignee")
         return notion_property
 
     def __create_page(self, database_id, data, delay_time):
@@ -50,6 +51,8 @@ class NotionService:
             notion_property.set_select("priority", item["priority"])
             notion_property.set_select("reporter", item["reporter"])
             notion_property.set_select("status", item["status"])
+            if item["assignee"]:
+                notion_property.set_select("assignee", item["assignee"])
             notion_property.set_date("date", start=item["create_date"], end=item["resolution_date"])
             notion_property.set_url("url", item["url"])
             # Original URL
@@ -58,10 +61,6 @@ class NotionService:
             if item["parent"]:
                 children.set_heading_1("Parent Issue")
                 children.set_paragraph(f'{item["parent"]["key"]} - {item["parent"]["summary"]}')
-            # Assignee
-            if item["assignee"]:
-                children.set_heading_1("Assignee")
-                children.set_paragraph(item["assignee"])
             # Description
             children.set_heading_1("Description")
             if item["description"]:
